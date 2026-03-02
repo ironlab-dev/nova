@@ -1,0 +1,62 @@
+name: Create Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version (e.g. 0.9.1-beta)'
+        required: true
+        default: '0.9.1-beta'
+      dmg_url:
+        description: 'DMG source URL'
+        required: true
+        default: 'https://nova.ironlab.cc/download/Nova-0.9.1-beta.dmg'
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Set version
+        id: version
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "version=${{ github.event.inputs.version }}" >> $GITHUB_OUTPUT
+            echo "dmg_url=${{ github.event.inputs.dmg_url }}" >> $GITHUB_OUTPUT
+          else
+            TAG="${GITHUB_REF#refs/tags/v}"
+            echo "version=${TAG}" >> $GITHUB_OUTPUT
+            echo "dmg_url=https://nova.ironlab.cc/download/Nova-${TAG}.dmg" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Download DMG
+        run: |
+          VERSION="${{ steps.version.outputs.version }}"
+          DMG_URL="${{ steps.version.outputs.dmg_url }}"
+          curl -L -o "Nova-${VERSION}.dmg" "${DMG_URL}"
+          echo "DMG size: $(du -sh Nova-${VERSION}.dmg | cut -f1)"
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ steps.version.outputs.version }}
+          name: Nova ${{ steps.version.outputs.version }}
+          prerelease: ${{ contains(steps.version.outputs.version, 'beta') || contains(steps.version.outputs.version, 'alpha') }}
+          body: |
+            ## Nova ${{ steps.version.outputs.version }}
+
+            ### Install
+            Download `Nova-${{ steps.version.outputs.version }}.dmg` below, open it, and drag Nova to Applications.
+
+            **Requirements**: macOS 13+, Cursor or VS Code installed
+
+            ### Homebrew
+            ```bash
+            brew tap ironlab-dev/nova
+            brew install --cask nova
+            ```
+          files: Nova-${{ steps.version.outputs.version }}.dmg
