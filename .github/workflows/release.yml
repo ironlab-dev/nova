@@ -56,7 +56,7 @@ jobs:
 
             ### Homebrew
             ```bash
-            brew tap ironlab-dev/nova
+            brew tap ironlab-dev/nova https://github.com/ironlab-dev/nova.git
             brew install --cask nova
             ```
           files: Nova-${{ steps.version.outputs.version }}.dmg
