@@ -1,6 +1,6 @@
 cask "nova" do
   version "0.9.7-beta"
-  sha256 "6b64d07d1cf8e70f280da841bcf20c53115d16108cfb8df64975b14c512f4d6c"
+  sha256 "bddd566aac7522fadb28348cde11d46e24876a7fbae6b4a2e773ec0ea85965d0"
 
   url "https://github.com/ironlab-dev/nova/releases/download/v#{version}/Nova-#{version}.dmg"
 
